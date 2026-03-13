@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.rengv.pokecubeutils.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
+  "server": [
+    "BlockItemMixin",
+    "CraftingResultSlotMixin",
+    "ItemEntityPlacementMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

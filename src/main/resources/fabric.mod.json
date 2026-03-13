@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "pokecubeutils",
+  "version": "${version}",
+  "name": "PokeCubeUtils",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/pokecubeutils/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.rengv.pokecubeutils.PokeCubeUtils"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "mixins": [
+    "blockrestriction.mixins.json"
+  ]
+}
