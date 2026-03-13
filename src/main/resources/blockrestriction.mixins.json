@@ -8,7 +8,8 @@
   "server": [
     "BlockItemMixin",
     "CraftingResultSlotMixin",
-    "ItemEntityPlacementMixin"
+    "ItemEntityPlacementMixin",
+    "ScreenHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

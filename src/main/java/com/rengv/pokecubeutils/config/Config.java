@@ -27,6 +27,7 @@ public class Config {
     public static Set<Identifier> disabled_block_break = new HashSet<>();
     public static Set<Identifier> disabled_entity_interact = new HashSet<>();
     public static Set<Identifier> disabled_entity_attack = new HashSet<>();
+    public static Set<Identifier> disabled_item_use = new HashSet<>();
     //public static Map<Identifier, Set<ChunkPos>> disabled_mount_chunks = new HashMap<>();
 
     private static class ConfigData {
@@ -36,6 +37,7 @@ public class Config {
         Set<Identifier> disabled_block_break;
         Set<Identifier> disabled_entity_interact;
         Set<Identifier> disabled_entity_attack;
+        Set<Identifier> disabled_item_use;
         //Map<Identifier, Set<ChunkPos>> disabled_mount_chunks;
     }
 
@@ -84,6 +86,7 @@ public class Config {
         disabled_block_break = d.disabled_block_break;
         disabled_entity_interact = d.disabled_entity_interact;
         disabled_entity_attack = d.disabled_entity_attack;
+        disabled_item_use = d.disabled_item_use;
 
         /*disabled_mount_chunks = d.disabled_mount_chunks != null
                 ? d.disabled_mount_chunks
@@ -103,6 +106,7 @@ public class Config {
         d.disabled_block_break = disabled_block_break;
         d.disabled_entity_interact = disabled_entity_interact;
         d.disabled_entity_attack = disabled_entity_attack;
+        d.disabled_item_use = disabled_item_use;
         //d.disabled_mount_chunks = disabled_mount_chunks;
 
         return d;

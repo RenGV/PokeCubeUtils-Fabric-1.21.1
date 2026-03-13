@@ -47,6 +47,7 @@ public class PokeCubeUtils implements ModInitializer {
         BreakBlockEvent.register();
         InteractBlockEvent.register();
         InteractEntityEvent.register();
+        UseItemEvent.register();
     }
 
     private void registerCommands(CommandDispatcher dispatcher) {
