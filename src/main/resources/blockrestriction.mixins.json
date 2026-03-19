@@ -9,7 +9,11 @@
     "BlockItemMixin",
     "CraftingResultSlotMixin",
     "ItemEntityPlacementMixin",
-    "ScreenHandlerMixin"
+    "ScreenHandlerMixin",
+    "PreventWorldChangeMixin",
+    "CommandBlockMixin",
+    "SpawnpointMixin",
+    "RespawnMixin"
   ],
   "injectors": {
     "defaultRequire": 1

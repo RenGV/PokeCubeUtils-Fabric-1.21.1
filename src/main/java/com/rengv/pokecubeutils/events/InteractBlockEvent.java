@@ -1,6 +1,8 @@
 package com.rengv.pokecubeutils.events;
 
+import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.config.Config;
+import com.rengv.pokecubeutils.utils.Utils;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
@@ -17,6 +19,11 @@ public class InteractBlockEvent {
 
             Block block = world.getBlockState(hitResult.getBlockPos()).getBlock();
             Identifier id = Registries.BLOCK.getId(block);
+
+            if(id.equals(Identifier.of("minecraft:ender_chest")) && player.getWorld().equals(PokeCubeUtils.EVENT_WORLD)) {
+                player.sendMessage(Utils.format("&cNo puedes hacer eso aquí"), true);
+                return ActionResult.FAIL;
+            }
 
             if(Config.disabled_block_interact.contains(id) && !player.hasPermissionLevel(2)) {
                 ((ServerPlayerEntity)player).networkHandler.sendPacket(new GameMessageS2CPacket(Text.literal("§cNo puedes hacer eso"), true));

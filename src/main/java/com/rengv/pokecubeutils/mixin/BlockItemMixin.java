@@ -1,6 +1,9 @@
 package com.rengv.pokecubeutils.mixin;
 
+import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.config.Config;
+import com.rengv.pokecubeutils.utils.EventManager;
+import com.rengv.pokecubeutils.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -27,6 +30,12 @@ public abstract class BlockItemMixin {
         Block block = this.getBlock();
         Identifier id = Registries.BLOCK.getId(block);
         PlayerEntity player = context.getPlayer();
+
+
+        if(player.getWorld().equals(PokeCubeUtils.EVENT_WORLD) && !EventManager.CAN_BUILD){
+            player.sendMessage(Utils.format("&cNo puedes hacer eso aquí"), true);
+            cir.setReturnValue(ActionResult.FAIL);
+        }
 
         if(Config.disabled_block_place.contains(id) && !player.hasPermissionLevel(2)) {
             ((ServerPlayerEntity)player).networkHandler.sendPacket(new GameMessageS2CPacket(Text.literal("§cNo puedes hacer eso"), true));

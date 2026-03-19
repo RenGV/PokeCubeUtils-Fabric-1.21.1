@@ -20,6 +20,9 @@ repositories {
     flatDir {
         dirs("libs")
     }
+
+    // Repositorio de Paper (incluye Bukkit/Spigot API)
+    maven { url "https://repo.papermc.io/repository/maven-public/" }
 }
 
 dependencies {
@@ -33,6 +36,9 @@ dependencies {
     modImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.23"
 
     modImplementation 'me.lucko:fabric-permissions-api:0.3.3'
+
+    // Bukkit API - solo para compilar, en runtime la provee Arclight
+    compileOnly "io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT"
 }
 
 processResources {

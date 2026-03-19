@@ -7,6 +7,7 @@ import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
 import com.mojang.brigadier.CommandDispatcher;
 import com.rengv.pokecubeutils.PokeCubeUtils;
+import com.rengv.pokecubeutils.utils.PermissionHelper;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -23,7 +24,7 @@ public class RandomShinyCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(
                 CommandManager.literal("randomshiny")
-                        .requires(source -> source.hasPermissionLevel(2))
+                        .requires(source -> PermissionHelper.hasCommandPermission(source, "pokecube.command.randomshiny"))
                         .then(CommandManager.argument("player", EntityArgumentType.player())
                                 .executes(context -> {
                                     ServerCommandSource source = context.getSource();
