@@ -27,11 +27,7 @@ public class RespawnMixin {
 
             ServerWorld currentWorld = player.getServerWorld();
 
-            PokeCubeUtils.LOGGER.info("old: " + oldPlayer.getWorld().getRegistryKey().getValue());
-            PokeCubeUtils.LOGGER.info("new: " + currentWorld.toServerWorld().getRegistryKey().getValue());
-
             if (PlayerList.players.containsKey(player.getUuid())) {
-                PokeCubeUtils.LOGGER.info("1");
                 if (currentWorld.getRegistryKey().equals(eventKey)) {
                     return;
                 }
@@ -53,13 +49,10 @@ public class RespawnMixin {
             }
 
             if (currentWorld.getRegistryKey().equals(eventKey)) {
-                // TODO: Debe llegar acá
-                PokeCubeUtils.LOGGER.info("llegó");
                 ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
                 PosData spawnCoords = Config.spawn_coords;
 
                 if (spawnWorld != null) {
-                    PokeCubeUtils.LOGGER.info("llegó 2");
                     player.teleport(
                             spawnWorld,
                             spawnCoords.x,

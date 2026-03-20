@@ -10,6 +10,7 @@ import com.rengv.pokecubeutils.config.Config;
 import com.rengv.pokecubeutils.config.PlayerData;
 import com.rengv.pokecubeutils.config.PlayerList;
 import com.rengv.pokecubeutils.config.PosData;
+import com.rengv.pokecubeutils.utils.EventBackup;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.Utils;
 import net.minecraft.component.DataComponentTypes;
@@ -27,9 +28,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.World;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class EventGUI extends ScreenHandler {
@@ -124,12 +128,23 @@ public class EventGUI extends ScreenHandler {
         infiniteRide.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&6&lRide Infinito"));
         List<Text> infiniteRideLore = List.of(
                 Utils.format("&7Haz click para des/habilitar la montura"),
-                Utils.format("&7infinita de los jugadores con rango."),
+                Utils.format("&7infinita en los Pokémon de los jugadores."),
                 Utils.format(""),
                 Utils.format(EventManager.INFINITE_RIDE_STAMINE ? "&a&lHabilitado" : "&c&lDeshabilitado")
         );
         infiniteRide.set(DataComponentTypes.LORE, new LoreComponent(infiniteRideLore));
         this.slots.get(6).setStack(infiniteRide);
+
+        ItemStack hunger = new ItemStack(Items.COOKED_BEEF);
+        hunger.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&f&lHambre"));
+        List<Text> hungerLore = List.of(
+                Utils.format("&7Haz click para des/habilitar el hambre"),
+                Utils.format("&7en los jugadores del evento."),
+                Utils.format(""),
+                Utils.format(EventManager.HUNGER ? "&a&lHabilitado" : "&c&lDeshabilitado")
+        );
+        hunger.set(DataComponentTypes.LORE, new LoreComponent(hungerLore));
+        this.slots.get(7).setStack(hunger);
 
         ItemStack retrievePokemon = Utils.getItemStack("cobblemon:citrine_ball", 1);
         retrievePokemon.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&e&lRecuperar Pokémon"));
@@ -138,7 +153,7 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7los pokémon a sus pokeballs.")
         );
         retrievePokemon.set(DataComponentTypes.LORE, new LoreComponent(retrievePokemonLore));
-        this.slots.get(7).setStack(retrievePokemon);
+        this.slots.get(8).setStack(retrievePokemon);
 
         ItemStack spawn = new ItemStack(Items.BEACON);
         spawn.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&b&lEstablecer Spawn"));
@@ -147,7 +162,7 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7aparición de los jugadores que se unan.")
         );
         spawn.set(DataComponentTypes.LORE, new LoreComponent(spawnLore));
-        this.slots.get(8).setStack(spawn);
+        this.slots.get(9).setStack(spawn);
 
         ItemStack player = new ItemStack(Items.PLAYER_HEAD);
         player.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&9&lAdministrar jugadores"));
@@ -157,7 +172,7 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7jugador del evento.")
         );
         player.set(DataComponentTypes.LORE, new LoreComponent(playerLore));
-        this.slots.get(9).setStack(player);
+        this.slots.get(10).setStack(player);
 
         ItemStack kit = new ItemStack(Items.DIAMOND_CHESTPLATE);
         kit.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&4&lKit para jugadores"));
@@ -166,7 +181,7 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7objetos a los jugadores.")
         );
         kit.set(DataComponentTypes.LORE, new LoreComponent(kitLore));
-        this.slots.get(10).setStack(kit);
+        this.slots.get(11).setStack(kit);
 
         ItemStack clear = new ItemStack(Items.BARRIER);
         clear.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&7&lBorrar inventario"));
@@ -175,7 +190,7 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7inventario de los jugadores.")
         );
         clear.set(DataComponentTypes.LORE, new LoreComponent(clearLore));
-        this.slots.get(11).setStack(clear);
+        this.slots.get(12).setStack(clear);
 
         ItemStack invite = new ItemStack(Items.NAME_TAG);
         invite.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&5&lInvitar jugadores"));
@@ -185,7 +200,34 @@ public class EventGUI extends ScreenHandler {
                 Utils.format("&7al evento.")
         );
         invite.set(DataComponentTypes.LORE, new LoreComponent(inviteLore));
-        this.slots.get(12).setStack(invite);
+        this.slots.get(13).setStack(invite);
+
+        ItemStack gamemode = new ItemStack(Items.CRAFTING_TABLE);
+        gamemode.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&6&lCambiar tu Modo de Juego"));
+        String gamemodeString = "&a&lSupervivencia";
+        GameMode gameMode = EventManager.REAL_GAMEMODE.getOrDefault(this.player.getUuid(), this.player.interactionManager.getGameMode());
+        switch (gameMode) {
+            case SURVIVAL -> gamemodeString = "&a&lSupervivencia";
+            case CREATIVE -> gamemodeString = "&c&lCreativo";
+            case SPECTATOR -> gamemodeString = "&9&lEspectador";
+        }
+        List<Text> gamemodeLore = List.of(
+                Utils.format("&7Haz click para cambiar tu"),
+                Utils.format("&7modo de juego."),
+                Utils.format(""),
+                Utils.format("&eEstás en modo: " + gamemodeString)
+        );
+        gamemode.set(DataComponentTypes.LORE, new LoreComponent(gamemodeLore));
+        this.slots.get(14).setStack(gamemode);
+
+        ItemStack time = new ItemStack(Items.CLOCK);
+        time.set(DataComponentTypes.CUSTOM_NAME, Utils.format("&5&lCambiar tiempo"));
+        List<Text> timeLore = List.of(
+                Utils.format("&7Haz click para cambiar"),
+                Utils.format("&7el tiempo del mundo evento.")
+        );
+        time.set(DataComponentTypes.LORE, new LoreComponent(timeLore));
+        this.slots.get(15).setStack(time);
 
         ItemStack manage = new ItemStack(EventManager.STARTED ? Items.RED_WOOL : Items.LIME_WOOL);
         manage.set(DataComponentTypes.CUSTOM_NAME, Utils.format(EventManager.STARTED ? "&c&lTerminar evento" : "&a&lEmpezar evento"));
@@ -252,6 +294,11 @@ public class EventGUI extends ScreenHandler {
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas &e" + enabled + " &bque los jugadores con rango tengan montura infinita."));
             build();
         } else if(slot == 7) {
+            EventManager.HUNGER = !EventManager.HUNGER;
+            String enabled = EventManager.HUNGER ? "habilitado" : "deshabilitado";
+            player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas &e" + enabled + " &bque los jugadores puedan tener hambre."));
+            build();
+        } else if(slot == 8) {
             int total = 0;
             for(Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
                 if(p.getValue().isManager()) continue;
@@ -273,22 +320,22 @@ public class EventGUI extends ScreenHandler {
 
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas devuelto todos los Pokémon de " + total + " jugadores a sus pokeballs."));
             build();
-        } else if(slot == 8) {
+        } else if(slot == 9) {
             PosData pos = new PosData(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
             Config.event_coords = pos;
             Config.save();
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas establecido el punto de aparición."));
-        } else if(slot == 9) {
+        } else if(slot == 10) {
             player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                     (syncId, inv, p) -> new PlayersManagerGUI(syncId, inv),
                     Utils.format("&9&lJugadores en Evento")
             ));
-        } else if(slot == 10) {
+        } else if(slot == 11) {
             player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                     (syncId, inv, p) -> new KitGUI(syncId, inv),
                     Utils.format("  &5&lEstablecer kit de evento")
             ));
-        } else if(slot == 11) {
+        } else if(slot == 12) {
             int total = 0;
             for(Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
                 if(p.getValue().isManager()) continue;
@@ -305,7 +352,7 @@ public class EventGUI extends ScreenHandler {
 
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas eliminado el inventario de " + total + " jugadores."));
             build();
-        } else if(slot == 12) {
+        } else if(slot == 13) {
             if(!EventManager.STARTED) {
                 player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &cNo hay ningún evento activo."));
                 return;
@@ -321,6 +368,39 @@ public class EventGUI extends ScreenHandler {
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas enviado la invitación a los jugadores."));
 
             ((ServerPlayerEntity) player).closeHandledScreen();
+        } else if(slot == 14) {
+            GameMode gameMode = EventManager.REAL_GAMEMODE.getOrDefault(player.getUuid(), ((ServerPlayerEntity) player).interactionManager.getGameMode());
+
+            if(gameMode.equals(GameMode.SURVIVAL)) {
+                EventManager.REAL_GAMEMODE.put(player.getUuid(), GameMode.CREATIVE);
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas cambiado tu modo de juego a &c&lCreativo&b."));
+            }
+            if(gameMode.equals(GameMode.CREATIVE)) {
+                EventManager.REAL_GAMEMODE.put(player.getUuid(), GameMode.SPECTATOR);
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas cambiado tu modo de juego a &9&lEspectador&b."));
+            }
+            if(gameMode.equals(GameMode.SPECTATOR)) {
+                EventManager.REAL_GAMEMODE.put(player.getUuid(), GameMode.SURVIVAL);
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas cambiado tu modo de juego a &a&lSupervivencia&b."));
+            }
+
+            build();
+        } else if(slot == 15) {
+            if(PokeCubeUtils.EVENT_WORLD instanceof ServerWorld serverWorld) {
+                long time = serverWorld.getTimeOfDay() % 24000;
+
+                if(time < 5000) {
+                    serverWorld.setTimeOfDay(5000);
+                } else if (time < 12000) {
+                    serverWorld.setTimeOfDay(12000);
+                } else if (time < 15000) {
+                    serverWorld.setTimeOfDay(15000);
+                } else {
+                    serverWorld.setTimeOfDay(0);
+                }
+
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas el tiempo del mundo evento."));
+            }
         } else if(slot == 22){
             if (EventManager.STARTED){
                 if(EventManager.CAN_JOIN_EVENT) {
@@ -340,18 +420,26 @@ public class EventGUI extends ScreenHandler {
 
                     if(spe == null) continue;
 
-                    EventManager.leaveBypass.add(uuid);
+                    try {
+                        EventBackup.loadPlayerData(spe);
+                        EventBackup.loadPokemon(spe);
 
-                    spe.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
-                    spe.getInventory().clear();
+                        EventManager.leaveBypass.add(uuid);
 
-                    PlayerList.players.remove(uuid);
-                    PlayerList.save();
+                        spe.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
+                        //spe.getInventory().clear();
 
-                    spe.changeGameMode(GameMode.SURVIVAL);
-                    EventManager.playerFrozen.remove(uuid);
+                        PlayerList.players.remove(uuid);
+                        PlayerList.save();
 
-                    spe.sendMessage(Utils.format("&e¡Gracias por participar del evento!"));
+                        spe.changeGameMode(GameMode.SURVIVAL);
+                        EventManager.playerFrozen.remove(uuid);
+
+                        spe.sendMessage(Utils.format("&e¡Gracias por participar del evento!"));
+                    } catch (IOException e) {
+                        player.sendMessage(Utils.format("&cHa ocurrido un error, no puedes salir el evento. &eAbre un ticket en &9Discord&e."));
+                        PokeCubeUtils.LOGGER.error(e.getMessage());
+                    }
                 }
 
                 ((ServerPlayerEntity) player).closeHandledScreen();
@@ -365,6 +453,21 @@ public class EventGUI extends ScreenHandler {
 
             ((ServerPlayerEntity) player).closeHandledScreen();
             build();
+        }
+    }
+
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+
+        if(!(player instanceof ServerPlayerEntity spe)) return;
+
+        UUID uuid = spe.getUuid();
+
+        GameMode real = EventManager.REAL_GAMEMODE.remove(uuid);
+
+        if(real != null) {
+            spe.changeGameMode(real);
         }
     }
 

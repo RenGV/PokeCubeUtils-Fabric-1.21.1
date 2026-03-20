@@ -76,6 +76,7 @@ public class PokeCubeUtils implements ModInitializer {
         InteractEntityEvent.register();
         UseItemEvent.register();
         FreezePlayerEvent.register();
+        HungerEvent.register();
         // PreventWorldChangeEvent.register();
 
         // BossBar

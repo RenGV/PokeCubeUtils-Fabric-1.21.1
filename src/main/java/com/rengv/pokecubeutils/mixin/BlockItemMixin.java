@@ -2,6 +2,7 @@ package com.rengv.pokecubeutils.mixin;
 
 import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.config.Config;
+import com.rengv.pokecubeutils.config.PlayerList;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.Utils;
 import net.minecraft.block.Block;
@@ -33,6 +34,8 @@ public abstract class BlockItemMixin {
 
 
         if(player.getWorld().equals(PokeCubeUtils.EVENT_WORLD) && !EventManager.CAN_BUILD){
+            if(PlayerList.players.get(player.getUuid()).isManager()) return;
+
             player.sendMessage(Utils.format("&cNo puedes hacer eso aquí"), true);
             cir.setReturnValue(ActionResult.FAIL);
         }

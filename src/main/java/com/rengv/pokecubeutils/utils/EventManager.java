@@ -1,10 +1,9 @@
 package com.rengv.pokecubeutils.utils;
 
 import net.minecraft.nbt.NbtList;
+import net.minecraft.world.GameMode;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class EventManager {
     public static boolean STARTED = false;
@@ -17,10 +16,13 @@ public class EventManager {
     public static boolean INFINITE_RIDE_STAMINE = false;
     public static boolean CAN_BUILD = false;
     public static boolean CAN_BREAK = false;
+    public static boolean HUNGER = false;
 
     public static final Set<UUID> leaveBypass = new HashSet<>();
     public static final Set<UUID> enterBypass = new HashSet<>();
     public static final Set<UUID> playerFrozen = new HashSet<>();
 
     public static NbtList kitItems = null;
+
+    public static final Map<UUID, GameMode> REAL_GAMEMODE = new HashMap<>();
 }

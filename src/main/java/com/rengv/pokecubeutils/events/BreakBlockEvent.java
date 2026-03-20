@@ -2,6 +2,7 @@ package com.rengv.pokecubeutils.events;
 
 import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.config.Config;
+import com.rengv.pokecubeutils.config.PlayerList;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.Utils;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -18,6 +19,8 @@ public class BreakBlockEvent {
             if(world.isClient()) return true;
 
             if(player.getWorld().equals(PokeCubeUtils.EVENT_WORLD) && !EventManager.CAN_BREAK){
+                if(PlayerList.players.get(player.getUuid()).isManager()) return true;
+
                 player.sendMessage(Utils.format("&cNo puedes hacer eso aquí"), true);
                 return false;
             }

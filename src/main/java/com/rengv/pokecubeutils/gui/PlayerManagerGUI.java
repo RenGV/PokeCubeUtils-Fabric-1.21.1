@@ -4,6 +4,7 @@ import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.config.Config;
 import com.rengv.pokecubeutils.config.PlayerList;
 import com.rengv.pokecubeutils.config.PosData;
+import com.rengv.pokecubeutils.utils.EventBackup;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.Utils;
 import net.minecraft.component.DataComponentTypes;
@@ -23,6 +24,7 @@ import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.TeleportTarget;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -154,21 +156,32 @@ public class PlayerManagerGUI extends ScreenHandler {
             target.getInventory().clear();
             player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas borrado el inventario de &e" + target.getName().getString() + "&b."));
         } else if(slot == 14) {
-            EventManager.leaveBypass.add(target.getUuid());
+            if(!(player instanceof ServerPlayerEntity spe)) return;
 
-            ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
-            PosData spawnCoords = Config.spawn_coords;
+            try {
+                EventBackup.loadPlayerData(spe);
+                EventBackup.loadPokemon(spe);
 
-            target.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
-            target.getInventory().clear();
-            PlayerList.players.remove(target.getUuid());
-            PlayerList.save();
+                EventManager.leaveBypass.add(target.getUuid());
 
-            target.changeGameMode(GameMode.SURVIVAL);
-            EventManager.playerFrozen.remove(target.getUuid());
+                ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
+                PosData spawnCoords = Config.spawn_coords;
 
-            target.sendMessage(Utils.format("&c¡Has sido expulsado del evento!"));
-            player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas expulsado a &e" + target.getName().getString() + "&b del evento."));
+                target.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
+                //target.getInventory().clear();
+
+                PlayerList.players.remove(target.getUuid());
+                PlayerList.save();
+
+                target.changeGameMode(GameMode.SURVIVAL);
+                EventManager.playerFrozen.remove(target.getUuid());
+
+                target.sendMessage(Utils.format("&c¡Has sido expulsado del evento!"));
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas expulsado a &e" + target.getName().getString() + "&b del evento."));
+            } catch (IOException e) {
+                player.sendMessage(Utils.format("&cHa ocurrido un error, no puedes salir el evento. &eAbre un ticket en &9Discord&e."));
+                PokeCubeUtils.LOGGER.error(e.getMessage());
+            }
         }
     }
 

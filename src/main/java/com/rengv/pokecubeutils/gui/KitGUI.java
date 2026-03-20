@@ -130,6 +130,8 @@ public class KitGUI extends ScreenHandler {
 
         if (slot == 53) {
             for (Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
+                if(p.getValue().isManager()) continue;
+
                 ServerPlayerEntity target = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(p.getKey());
                 if (target == null) continue;
 
@@ -141,7 +143,7 @@ public class KitGUI extends ScreenHandler {
                 }
             }
 
-            player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &bEl Kit entregado a los jugadores."));
+            player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &bEl Kit se ha entregado a los jugadores."));
             return;
         }
 

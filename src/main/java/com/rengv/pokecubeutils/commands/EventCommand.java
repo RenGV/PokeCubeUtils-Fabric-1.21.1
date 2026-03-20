@@ -7,6 +7,7 @@ import com.rengv.pokecubeutils.config.PlayerData;
 import com.rengv.pokecubeutils.config.PlayerList;
 import com.rengv.pokecubeutils.config.PosData;
 import com.rengv.pokecubeutils.gui.EventGUI;
+import com.rengv.pokecubeutils.utils.EventBackup;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.PermissionHelper;
 import com.rengv.pokecubeutils.utils.Utils;
@@ -16,7 +17,10 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class EventCommand {
@@ -37,12 +41,6 @@ public class EventCommand {
                                         return 0;
                                     }
 
-                                    if(!Utils.isInventoryEmpty(player)) {
-                                        player.sendMessage(Utils.format("&cDebes tener el inventario vacío para entrar al evento."));
-                                        return 0;
-
-                                    }
-
                                     if(!EventManager.CAN_JOIN_EVENT) {
                                         player.sendMessage(Utils.format("&cYa no se puede entrar al evento."));
                                         return 0;
@@ -55,22 +53,36 @@ public class EventCommand {
                                         return 0;
                                     }
 
-                                    ServerWorld eventWorld = Utils.getWorld(Config.world_event);
-                                    PosData eventCoords = Config.event_coords;
+                                    try {
+                                        if(!player.getWorld().equals(PokeCubeUtils.EVENT_WORLD)) {
+                                            EventBackup.savePlayerData(player);
+                                            EventBackup.savePokemon(player);
+                                        }
 
-                                    EventManager.enterBypass.add(uuid);
-                                    player.teleport(eventWorld, eventCoords.x, eventCoords.y, eventCoords.z, eventCoords.yaw, eventCoords.pitch);
+                                        ServerWorld eventWorld = Utils.getWorld(Config.world_event);
+                                        PosData eventCoords = Config.event_coords;
 
-                                    player.getAbilities().allowFlying = false;
-                                    player.getAbilities().flying = false;
-                                    player.sendAbilitiesUpdate();
+                                        EventManager.enterBypass.add(uuid);
+                                        player.teleport(eventWorld, eventCoords.x, eventCoords.y, eventCoords.z, eventCoords.yaw, eventCoords.pitch);
 
-                                    PlayerData playerData = new PlayerData(player.getName().getString());
+                                        player.getInventory().clear();
+                                        player.setExperienceLevel(0);
+                                        player.setExperiencePoints(0);
 
-                                    PlayerList.players.put(uuid, playerData);
-                                    PlayerList.save();
+                                        player.getAbilities().allowFlying = false;
+                                        player.getAbilities().flying = false;
+                                        player.sendAbilitiesUpdate();
 
-                                    player.sendMessage(Utils.format("&a¡Te has unido al evento!"), false);
+                                        PlayerData playerData = new PlayerData(player.getName().getString());
+
+                                        PlayerList.players.put(uuid, playerData);
+                                        PlayerList.save();
+
+                                        player.sendMessage(Utils.format("&a¡Te has unido al evento!"), false);
+                                    } catch (IOException e) {
+                                        player.sendMessage(Utils.format("&cHa ocurrido un error, no puedes ingresar al evento."));
+                                        PokeCubeUtils.LOGGER.error(e.getMessage());
+                                    }
 
                                     return 1;
                                 })
@@ -90,20 +102,29 @@ public class EventCommand {
                                         return 0;
                                     }
 
-                                    EventManager.leaveBypass.add(player.getUuid());
+                                    try {
+                                        EventBackup.loadPlayerData(player);
+                                        EventBackup.loadPokemon(player);
 
-                                    ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
-                                    PosData spawnCoords = Config.spawn_coords;
+                                        EventManager.leaveBypass.add(player.getUuid());
 
-                                    player.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
-                                    player.getInventory().clear();
-                                    PlayerList.players.remove(uuid);
-                                    PlayerList.save();
+                                        ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
+                                        PosData spawnCoords = Config.spawn_coords;
 
-                                    player.changeGameMode(GameMode.SURVIVAL);
-                                    EventManager.playerFrozen.remove(uuid);
+                                        player.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
+                                        //player.getInventory().clear();
 
-                                    player.sendMessage(Utils.format("&a¡Has salido del evento!"));
+                                        PlayerList.players.remove(uuid);
+                                        PlayerList.save();
+
+                                        player.changeGameMode(GameMode.SURVIVAL);
+                                        EventManager.playerFrozen.remove(uuid);
+
+                                        player.sendMessage(Utils.format("&a¡Has salido del evento!"));
+                                    } catch (IOException e) {
+                                        player.sendMessage(Utils.format("&cHa ocurrido un error, no puedes salir dl evento. &eAbre un ticket en &9Discord&e."));
+                                        PokeCubeUtils.LOGGER.error(e.getMessage());
+                                    }
 
                                     return 1;
                                 })
@@ -134,6 +155,13 @@ public class EventCommand {
                                             player.sendMessage(Utils.format("&cNo estás en el mundo de eventos. Usa: &e/eventos create"));
                                             return 1;
                                         }
+
+                                        GameMode current = player.interactionManager.getGameMode();
+                                        EventManager.REAL_GAMEMODE.put(player.getUuid(), current);
+                                        if(current == GameMode.SPECTATOR) {
+                                            player.changeGameMode(GameMode.CREATIVE);
+                                        }
+
                                         player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                                                 (syncId, inv, p) -> new EventGUI(syncId, inv),
                                                 Utils.format("&2&l            Eventos")
@@ -151,11 +179,6 @@ public class EventCommand {
                                     ServerCommandSource source = context.getSource();
 
                                     if (source.getEntity() instanceof ServerPlayerEntity player) {
-                                        if(!Utils.isInventoryEmpty(player)) {
-                                            player.sendMessage(Utils.format("&cDebes tener el inventario vacío para crear un evento."));
-                                            return 0;
-                                        }
-
                                         UUID uuid = player.getUuid();
 
                                         if (PlayerList.players.containsKey(uuid)) {
@@ -163,18 +186,37 @@ public class EventCommand {
                                             return 0;
                                         }
 
-                                        ServerWorld eventWorld = Utils.getWorld(Config.world_event);
-                                        PosData eventCoords = Config.event_coords;
+                                        try {
+                                            if(!player.getWorld().equals(PokeCubeUtils.EVENT_WORLD)) {
+                                                EventBackup.savePlayerData(player);
+                                                EventBackup.savePokemon(player);
+                                            }
 
-                                        EventManager.enterBypass.add(uuid);
-                                        player.teleport(eventWorld, eventCoords.x, eventCoords.y, eventCoords.z, eventCoords.yaw, eventCoords.pitch);
+                                            ServerWorld eventWorld = Utils.getWorld(Config.world_event);
+                                            PosData eventCoords = Config.event_coords;
 
-                                        PlayerData playerData = new PlayerData(player.getName().getString(), true);
+                                            EventManager.enterBypass.add(uuid);
+                                            player.teleport(eventWorld, eventCoords.x, eventCoords.y, eventCoords.z, eventCoords.yaw, eventCoords.pitch);
 
-                                        PlayerList.players.put(uuid, playerData);
-                                        PlayerList.save();
+                                            player.getInventory().clear();
+                                            player.setExperienceLevel(0);
+                                            player.setExperiencePoints(0);
 
-                                        player.sendMessage(Utils.format("&a¡Estás creando un nuevo evento! Usa &e/evento gui &apara configurar el evento."), false);
+                                            PlayerData playerData = new PlayerData(player.getName().getString(), true);
+
+                                            PlayerList.players.put(uuid, playerData);
+                                            PlayerList.save();
+
+                                            if(PokeCubeUtils.EVENT_WORLD instanceof ServerWorld serverWorld) {
+                                                serverWorld.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(false, PokeCubeUtils.SERVER);
+                                            }
+
+                                            player.sendMessage(Utils.format("&a¡Estás creando un nuevo evento! Usa &e/evento gui &apara configurar el evento."), false);
+                                        } catch (IOException e) {
+                                            player.sendMessage(Utils.format("&cHa ocurrido un error, no puedes crear un evento."));
+                                            PokeCubeUtils.LOGGER.error(e.getMessage());
+                                        }
+
                                         return 1;
                                     }
 
