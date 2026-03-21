@@ -307,7 +307,7 @@ public class EventGUI extends ScreenHandler {
 
                 ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
 
-                if(spe == null) return;
+                if(spe == null) continue;
 
                 PlayerPartyStore party = Cobblemon.INSTANCE.getStorage().getParty(spe);
                 for (int i = 0; i < party.size(); i++) {
@@ -344,7 +344,7 @@ public class EventGUI extends ScreenHandler {
 
                 ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
 
-                if(spe == null) return;
+                if(spe == null) continue;
 
                 spe.getInventory().clear();
                 total++;
@@ -399,7 +399,7 @@ public class EventGUI extends ScreenHandler {
                     serverWorld.setTimeOfDay(0);
                 }
 
-                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas el tiempo del mundo evento."));
+                player.sendMessage(Utils.format("&e&l[&a&lEvento&e&l] &r&bHas cambiado el tiempo del mundo evento."));
             }
         } else if(slot == 22){
             if (EventManager.STARTED){

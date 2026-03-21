@@ -207,9 +207,9 @@ public class EventCommand {
                                             PlayerList.players.put(uuid, playerData);
                                             PlayerList.save();
 
-                                            if(PokeCubeUtils.EVENT_WORLD instanceof ServerWorld serverWorld) {
-                                                serverWorld.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(false, PokeCubeUtils.SERVER);
-                                            }
+//                                            if(PokeCubeUtils.EVENT_WORLD instanceof ServerWorld serverWorld) {
+//                                                serverWorld.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(false, PokeCubeUtils.SERVER);
+//                                            }
 
                                             player.sendMessage(Utils.format("&a¡Estás creando un nuevo evento! Usa &e/evento gui &apara configurar el evento."), false);
                                         } catch (IOException e) {

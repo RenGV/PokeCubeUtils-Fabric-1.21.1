@@ -15,7 +15,7 @@ public class FreezePlayerEvent {
             for(UUID uuid : EventManager.playerFrozen) {
                 ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
 
-                if(spe == null) return;
+                if(spe == null) continue;
 
                 spe.setVelocity(0, 0, 0);
                 spe.velocityModified = true;

@@ -99,7 +99,7 @@ public class PlayersManagerGUI extends ScreenHandler {
                 String name = p.getValue().getName();
                 ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
 
-                if(spe == null) return;
+                if(spe == null) continue;
                 player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                         (syncId, inv, pe) -> new PlayerManagerGUI(syncId, inv, spe),
                         Utils.format("&9&lAcciones para &e&l" + name)

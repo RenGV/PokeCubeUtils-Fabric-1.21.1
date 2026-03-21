@@ -18,17 +18,17 @@ public class HungerEvent {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if(!EventManager.STARTED) return;
 
-            if(EventManager.HUNGER) return;
+            if(!EventManager.HUNGER) {
+                for(Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
+                    UUID uuid = p.getKey();
 
-            for(Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
-                UUID uuid = p.getKey();
+                    ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
 
-                ServerPlayerEntity spe = PokeCubeUtils.SERVER.getPlayerManager().getPlayer(uuid);
+                    if(spe == null) continue;
 
-                if(spe == null) return;
-
-                spe.getHungerManager().setFoodLevel(20);
-                spe.getHungerManager().setSaturationLevel(20.0f);
+                    spe.getHungerManager().setFoodLevel(20);
+                    spe.getHungerManager().setSaturationLevel(20.0f);
+                }
             }
         });
     }
