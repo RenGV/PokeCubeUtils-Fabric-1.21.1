@@ -8,12 +8,15 @@ import com.rengv.pokecubeutils.commands.RandomShinyCommand;
 import com.rengv.pokecubeutils.commands.ReloadCommand;
 import com.rengv.pokecubeutils.config.Config;
 import com.rengv.pokecubeutils.config.PlayerList;
+import com.rengv.pokecubeutils.config.PosData;
 import com.rengv.pokecubeutils.events.*;
 import com.rengv.pokecubeutils.utils.Utils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.bukkit.Bukkit;
 import org.slf4j.Logger;
@@ -45,6 +48,29 @@ public class PokeCubeUtils implements ModInitializer {
                     registerCommands(dispatcher);
                 }
         );
+
+
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            var player = handler.getPlayer();
+
+            server.execute(() -> {
+                if(PlayerList.players.containsKey(player.getUuid())) {
+                    ServerWorld eventWorld = Utils.getWorld(Config.world_event);
+                    PosData eventCoords = Config.event_coords;
+
+                    if (eventWorld != null) {
+                        player.teleport(
+                                eventWorld,
+                                eventCoords.x,
+                                eventCoords.y,
+                                eventCoords.z,
+                                eventCoords.yaw,
+                                eventCoords.pitch
+                        );
+                    }
+                }
+            });
+        });
 
         registerCobblemonEvents();
 

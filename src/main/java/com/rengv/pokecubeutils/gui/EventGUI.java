@@ -31,10 +31,7 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class EventGUI extends ScreenHandler {
     private final ServerPlayerEntity player;
@@ -412,7 +409,11 @@ public class EventGUI extends ScreenHandler {
                 ServerWorld spawnWorld = Utils.getWorld(Config.world_spawn);
                 PosData spawnCoords = Config.spawn_coords;
 
-                for(Map.Entry<UUID, PlayerData> p : PlayerList.players.entrySet()) {
+                Iterator<Map.Entry<UUID, PlayerData>> iterator = PlayerList.players.entrySet().iterator();
+
+                while (iterator.hasNext()) {
+                    Map.Entry<UUID, PlayerData> p = iterator.next();
+
                     if(p.getValue().isManager()) continue;
 
                     UUID uuid = p.getKey();
@@ -427,9 +428,8 @@ public class EventGUI extends ScreenHandler {
                         EventManager.leaveBypass.add(uuid);
 
                         spe.teleport(spawnWorld, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.yaw, spawnCoords.pitch);
-                        //spe.getInventory().clear();
 
-                        PlayerList.players.remove(uuid);
+                        iterator.remove();
                         PlayerList.save();
 
                         spe.changeGameMode(GameMode.SURVIVAL);
