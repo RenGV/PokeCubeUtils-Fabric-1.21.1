@@ -1,6 +1,7 @@
 package com.rengv.pokecubeutils.events;
 
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
+import com.cobblemon.mod.common.battles.BattleRegistry;
 import com.rengv.pokecubeutils.PokeCubeUtils;
 import com.rengv.pokecubeutils.utils.EventManager;
 import com.rengv.pokecubeutils.utils.PermissionHelper;
@@ -12,9 +13,13 @@ public class SentPokemonEvent {
         CobblemonEvents.POKEMON_SENT_PRE.subscribe(event -> {
             ServerPlayerEntity player = event.getPokemon().getOwnerPlayer();
 
+            if(player == null) return;
+
             if(!player.getWorld().equals(PokeCubeUtils.EVENT_WORLD)) return;
 
             if (PermissionHelper.hasCommandPermission(player.getCommandSource(), "pokecube.bypass")) return;
+
+            if (BattleRegistry.getBattleByParticipatingPlayer(player) != null) return;
 
             if(EventManager.CAN_USE_POKEMON) return;
 
